@@ -29,8 +29,18 @@ const routes = [
     component: () => import(/* webpackChunkName: "albums" */ '@/views/Albums.vue')
   },
   {
+    path: '/tracks',
+    name: 'Tracks',
+    component: () => import(/* webpackChunkName: "albums" */ '@/views/Tracks.vue')
+  },
+  {
+    path: '/genres',
+    name: 'Genres',
+    component: () => import(/* webpackChunkName: "albums" */ '@/views/Genres.vue')
+  },
+  {
     path: '*',
-    component: () => import(/* webpackChunkName: "404" */ '@/view/404.vue')
+    component: () => import(/* webpackChunkName: "404" */ '@/views/404.vue')
   },
 ]
 
