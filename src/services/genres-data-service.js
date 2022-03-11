@@ -1,7 +1,7 @@
 import http from "@/utils/http-common";
 class GenresDataService {
-    getGenresList() {
-        return http.get("/genres/");
+    getGenresList(params) {
+        return http.get("/genres/", { params });
     }
     // getArtistById(id, params) {
     //   return http.get(`/artists/${id}`, { params });

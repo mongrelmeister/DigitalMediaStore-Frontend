@@ -9,10 +9,16 @@
     </b-row>
     <b-row>
       <b-col class="sm-10">
-        <b-button variant="primary" v-b-modal.add-album-modal>
+        <b-button variant="primary" v-b-modal.add-genre-modal>
           Añadir Género
         </b-button>
       </b-col>
+      <pagination
+        :totalPages="10"
+        :perPage="10"
+        :currentPage="currentPage"
+        @pagechanged="onPageChange"
+      />
     </b-row>
     <b-row>
       <b-col class="sm-10">
@@ -39,7 +45,6 @@
               <b-icon icon="trash-fill" variant="light"></b-icon>
             </b-button>
           </template>
-
           <template #row-details="row">
             <b-card>
               <ul>
@@ -52,7 +57,6 @@
         </b-table>
       </b-col>
     </b-row>
-
     <b-modal
       ref="addGenreModal"
       id="add-genre-modal"
@@ -135,6 +139,7 @@
 
 <script>
 import Alert from "@/components/Alert.vue";
+import Pagination from "@/components/Pagination.vue";
 import GenresDataService from "@/services/genres-data-service.js";
 
 export default {
@@ -150,6 +155,7 @@ export default {
           label: "Acciones",
         },
       ],
+      currentPage: 1,
       items: [],
       message: "",
       showMessage: false,
@@ -164,10 +170,11 @@ export default {
   },
   components: {
     alert: Alert,
+    Pagination,
   },
   methods: {
-    retrieveGenres() {
-      GenresDataService.getGenresList()
+    retrieveGenres(currentPage) {
+      GenresDataService.getGenresList({ page: currentPage })
         .then((response) => {
           const items = response.data;
           this.items = items;
@@ -180,41 +187,41 @@ export default {
     createGenre(payload) {
       GenresDataService.postGenre(payload)
         .then(() => {
-          this.retrieveAlbums();
+          this.retrieveGenres(this.currentPage);
           this.message = "Género creado";
           this.showMessage = true;
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.log(error);
-          this.retrieveGenres();
+          this.retrieveGenres(this.currentPage);
         });
     },
     updateGenre(id, payload) {
       GenresDataService.putGenre(id, payload)
         .then(() => {
-          this.retrieveGenres();
+          this.retrieveGenres(this.currentPage);
           this.message = "Género con id: " + id + " actualizado";
           this.showMessage = true;
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.log(error);
-          this.retrieveGenres();
+          this.retrieveGenres(this.currentPage);
         });
     },
     deleteGenre(genre) {
-      // AlbumsDataService.deleteAlbum(album.id)
-      //   .then(() => {
-      //     this.retrieveAlbums();
-      this.message = "Género con id: " + genre.id + " eliminado";
-      this.showMessage = true;
-      //   })
-      //   .catch((error) => {
-      //     // eslint-disable-next-line
-      //     console.log(error);
-      //     this.retrieveAlbums();
-      //   });
+      GenresDataService.deleteGenre(genre.id)
+        .then(() => {
+          this.retrieveGenres(this.currentPage);
+          this.message = "Género con id: " + genre.id + " eliminado";
+          this.showMessage = true;
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.log(error);
+          this.retrieveGenres(this.currentPage);
+        });
     },
     initForm() {
       this.addGenreForm.name = "";
@@ -225,7 +232,7 @@ export default {
       evt.preventDefault();
       this.$bvModal.hide("add-genre-modal");
       const payload = {
-        title: this.addGenreForm.name,
+        name: this.addGenreForm.name,
       };
       this.createGenre(payload);
       this.initForm();
@@ -242,7 +249,7 @@ export default {
       evt.preventDefault();
       this.$bvModal.hide("edit-genre-modal");
       const payload = {
-        title: this.editGenreForm.name,
+        name: this.editGenreForm.name,
       };
       this.updateGenre(this.editGenreForm.id, payload);
       this.initForm();
@@ -252,9 +259,14 @@ export default {
       this.$bvModal.hide("edit-genre-modal");
       this.initForm();
     },
+    onPageChange(page) {
+      console.log(page);
+      this.currentPage = page;
+      this.retrieveGenres(this.currentPage);
+    },
   },
   created() {
-    this.retrieveGenres();
+    this.retrieveGenres(this.currentPage);
   },
 };
 </script>
